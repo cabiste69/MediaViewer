@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.3.32901.215
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MediaViewer", "MediaViewer\MediaViewer.csproj", "{16E58350-EA11-4418-896B-7085D7AB7300}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{16E58350-EA11-4418-896B-7085D7AB7300}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{16E58350-EA11-4418-896B-7085D7AB7300}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{16E58350-EA11-4418-896B-7085D7AB7300}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{16E58350-EA11-4418-896B-7085D7AB7300}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {F7FE9164-236F-40FA-B8B8-911D76BA010B}
+	EndGlobalSection
+EndGlobal
