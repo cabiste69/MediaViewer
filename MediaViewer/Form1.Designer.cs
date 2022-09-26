@@ -36,9 +36,12 @@ namespace MediaViewer
             // 
             // PictureOpened
             // 
+            this.PictureOpened.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.PictureOpened.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
             this.PictureOpened.Location = new System.Drawing.Point(0, 0);
-            this.PictureOpened.Margin = new System.Windows.Forms.Padding(20);
+            this.PictureOpened.Margin = new System.Windows.Forms.Padding(0);
             this.PictureOpened.Name = "PictureOpened";
             this.PictureOpened.Size = new System.Drawing.Size(1064, 635);
             this.PictureOpened.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
@@ -54,6 +57,7 @@ namespace MediaViewer
             this.Controls.Add(this.PictureOpened);
             this.Name = "Form1";
             this.Text = "Form1";
+            this.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.Form1_KeyPress);
             ((System.ComponentModel.ISupportInitialize)(this.PictureOpened)).EndInit();
             this.ResumeLayout(false);
 
