@@ -1,5 +1,5 @@
-using MediaViewer.zeze;
 using System.Diagnostics;
+using System.Reflection.Metadata.Ecma335;
 using System.Windows.Forms;
 
 namespace MediaViewer
@@ -12,17 +12,55 @@ namespace MediaViewer
         private int _imageWidth { get; set; }
         private int _imageHeight { get; set; }
         private int _zoomModifier { get; set; } = 0;
-        private float _zoomLevel { get; set; } = 0;
-        private int imgx = 0;
-        private int imgy = 0;
+        private int _zoomLevel { get; set; } = 1;
+        private List<string> _otherImages { get; set; }
+        private List<string> supportedExtensions = new List<string> { ".BMP", ".PNG", ".JPG", ".JPEG", ".ICO", ".GIF" };
+        private int _currentImageindex { get; set; } = -1;
 
         public Form1(string[] args)
         {
             InitializeComponent();
-            SetImage(args);
+            SetImage(args[0]);
             this.SizeChanged += Window_SizeChanged;
             PictureOpened.MouseMove += MoveImage_MouseMove;
-            this.MouseWheel += NewZoomImage_MouseWheel;
+            this.MouseWheel += ZoomImage_MouseWheel;
+            CheckForOtherImages();
+        }
+
+        private void CheckForOtherImages()
+        {
+            string currentDirectory = Directory.GetCurrentDirectory();
+            _otherImages = Directory.GetFiles(currentDirectory).ToList();
+
+            // filter only supported images
+            for (int i = 0; i < _otherImages.Count; i++)
+            {
+                if (_image == _otherImages[i])
+                {
+                    _currentImageindex = i;
+                }
+                if (!supportedExtensions.Contains(Path.GetExtension(_otherImages[i]).ToUpperInvariant()))
+                {
+                    _otherImages.RemoveAt(i);
+                    i--;
+                }
+            }
+
+            // if there're no other images no need to continue
+            if (_otherImages.Count == 0)
+            {
+                return;
+            }
+
+            // for debugging
+            for (int i = 0; i < _otherImages.Count; i++)
+            {
+                Debug.WriteLine(_otherImages[i]);
+            }
+
+            // set the previous and next image buttons
+            button_PreviousImage.Visible = _currentImageindex != 0 ? true : false;
+            button_NextImage.Visible = _currentImageindex != _otherImages.Count - 1 ? true : false;
         }
 
         private void PictureOpened_MouseClick(object? sender, MouseEventArgs e)
@@ -41,21 +79,19 @@ namespace MediaViewer
             _WindowWidth = this.Width;
         }
 
-        private void SetImage(string[] args)
+        private void SetImage(string arg)
         {
-            if (args.Length == 0)
+            if (arg is null)
             {
                 return;
             }
 
-            List<string> supportedExtensions = new List<string> { "BMP", "PNG", "JPG", "JPEG", "ICO", "GIF" };
-
-            if (supportedExtensions.Contains(Path.GetExtension(args[0]).ToUpperInvariant()))
+            if (! supportedExtensions.Contains(Path.GetExtension(arg).ToUpperInvariant()))
             {
                 return;
             }
 
-            _image = args[0];
+            _image = arg;
             //Debug.WriteLine(Screen.FromControl(this).Bounds.ToString());
             PictureOpened.Image = Image.FromFile(_image);
             //this.Size = PictureOpened.Image.Size;
@@ -74,78 +110,42 @@ namespace MediaViewer
             //Debug.WriteLine(PictureOpened.MinimumSize);
         }
 
-        //private void ZoomImage_MouseWheel(object? sender, MouseEventArgs e)
-        //{
-        //    //Debug.WriteLine(e.Delta);
-        //    if (e.Delta > 0)
-        //    {
-        //        _imageHeight += 20;
-        //        _imageWidth += 20;
-        //        _zoomLevel++;
-        //        int y = (_zoomLevel * 20) - (e.Y - 1); 
-        //        int x = (_zoomLevel * 20) - (e.X - 1);
-        //        PictureOpened.Location = new Point(x, y);
-        //        PictureOpened.Size = new Size(_imageWidth, _imageHeight);
-
-        //        //PictureOpened.Bounds = new Rectangle(0, 0, ImageWidth , ImageHeight);
-        //        //PictureOpened.Location = new Point(PictureOpened.Location.X + e.X, PictureOpened.Location.Y + e.Y)
-        //        _zoomModifier+= 2;
-        //    }
-        //    else
-        //    {
-        //        _imageHeight -= 20;
-        //        _imageWidth -= 20;
-        //        _zoomModifier -= 2;
-        //        _zoomLevel--;
-        //        int y = e.Y - (_zoomLevel * 20);
-        //        int x = e.X - (_zoomLevel * 20);
-        //        PictureOpened.Location = new Point(x, y);
-        //        PictureOpened.Size = new Size(_imageWidth, _imageHeight);
-        //        if (_zoomModifier == 0)
-        //        {
-        //            PictureOpened.Location = new Point(0,0);
-        //        }
-        //    }
-
-        //    //PictureOpened.Bounds = new Rectangle(0, 0, ImageWidth, ImageHeight);
-        //}
-
-        private void NewZoomImage_MouseWheel(object? sender, MouseEventArgs e)
+        private void ZoomImage_MouseWheel(object? sender, MouseEventArgs e)
         {
-            float oldzoom = _zoomLevel;
-
+            //Debug.WriteLine(e.Delta);
             if (e.Delta > 0)
             {
-                _zoomLevel += 0.1F;
+                _imageHeight += 20;
+                _imageWidth += 20;
+                _zoomLevel++;
+                int y = (_zoomLevel * 20) - (e.Y - 1);
+                int x = (_zoomLevel * 20) - (e.X - 1);
+                //PictureOpened.Location = new Point(x, y);
+                PictureOpened.Size = new Size(_imageWidth, _imageHeight);
+
+                //PictureOpened.Bounds = new Rectangle(0, 0, ImageWidth , ImageHeight);
+                //PictureOpened.Location = new Point(PictureOpened.Location.X + e.X, PictureOpened.Location.Y + e.Y)
+                _zoomModifier += 2;
             }
-            else if (e.Delta < 0)
+            else
             {
-                _zoomLevel = Math.Max(_zoomLevel - 0.1F, 0.01F);
+                _imageHeight -= 20;
+                _imageWidth -= 20;
+                _zoomModifier -= 2;
+                _zoomLevel--;
+                int y = e.Y - (_zoomLevel * 20);
+                int x = e.X - (_zoomLevel * 20);
+                //PictureOpened.Location = new Point(x, y);
+                PictureOpened.Size = new Size(_imageWidth, _imageHeight);
+                if (_zoomModifier == 0)
+                {
+                    PictureOpened.Location = new Point(0, 0);
+                }
             }
 
-            Point mousePosNow = e.Location;
-
-            // Where location of the mouse in the pictureframe
-            int x = mousePosNow.X - PictureOpened.Location.X;
-            int y = mousePosNow.Y - PictureOpened.Location.Y;
-
-            // Where in the IMAGE is it now
-            int oldimagex = (int)(x / oldzoom);
-            int oldimagey = (int)(y / oldzoom);
-
-            // Where in the IMAGE will it be when the new zoom i made
-            int newimagex = (int)(x / _zoomLevel);
-            int newimagey = (int)(y / _zoomLevel);
-
-            // Where to move image to keep focus on one point
-            imgx = newimagex - oldimagex + imgx;
-            imgy = newimagey - oldimagey + imgy;
-            _imageWidth = Convert.ToInt32(_imageWidth * _zoomLevel);
-            _imageHeight = Convert.ToInt32(_imageHeight * _zoomLevel);
-
-            PictureOpened.Size = new Size(_imageWidth, _imageHeight);
-            PictureOpened.Location = new Point(imgx, imgy);
+            //PictureOpened.Bounds = new Rectangle(0, 0, ImageWidth, ImageHeight);
         }
+
 
         private Point _mouseLocationOnDragEnter { get; set; }
         private void MoveImage_MouseMove(object? sender, MouseEventArgs e)
@@ -172,6 +172,19 @@ namespace MediaViewer
                 PictureOpened.Location = new Point();
                 PictureOpened.Size = new Size(_WindowWidth, _WindowHeight);
             }
+        }
+
+        private void button_NextImage_Click(object sender, EventArgs e)
+        {
+            SetImage(_otherImages[_currentImageindex + 1]);
+            CheckForOtherImages();
+        }
+
+        private void button_PreviousImage_Click(object sender, EventArgs e)
+        {
+
+            SetImage(_otherImages[_currentImageindex - 1]);
+            CheckForOtherImages();
         }
     }
 }
